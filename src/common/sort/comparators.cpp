@@ -362,3 +362,5 @@ void Comparators::SwizzleSingleValue(data_ptr_t data_ptr, const data_ptr_t &heap
 }
 
 } // namespace duckdb
+
+
