@@ -513,9 +513,6 @@ void HTTPFileHandle::Initialize(FileOpener *opener) {
 			}
 			length = 0;
 			return;
-		} else {
-			throw IOException("Unable to connect to URL \"" + path + "\": " + to_string(res->code) + " (" + res->error +
-			                  ")");
 		}
 	}
 
@@ -525,6 +522,23 @@ void HTTPFileHandle::Initialize(FileOpener *opener) {
 	}
 
 	length = atoll(res->headers["Content-Length"].c_str());
+
+	// HEAD request fail, use Range requet for another try(read only one byte)
+	if (length == 0 && FileFlags::FILE_FLAGS_READ) {
+		char dummy_buffer[2];
+		auto range_res = hfs.GetRangeRequest(*this, path, {}, 0, dummy_buffer, 2);
+		if (range_res->code != 206) {
+			throw IOException("Unable to connect to URL \"" + path + "\": " + to_string(res->code) + " (" + res->error +
+			                  ")");
+		}
+		auto range_find = range_res->headers["Content-Range"].find("/");
+		auto range_length = range_res->headers["Content-Range"].substr(range_find + 1);
+		if (range_length == "*") {
+			throw IOException("Unknown total length of the document \"" + path + "\": " + to_string(res->code) + " (" +
+			                  res->error + ")");
+		}
+		length = atoll(range_length.c_str());
+	}
 
 	if (!res->headers["Last-Modified"].empty()) {
 		auto result = StrpTimeFormat::Parse("%a, %d %h %Y %T %Z", res->headers["Last-Modified"]);
