@@ -11,7 +11,7 @@ build/release/test/unittest test/sql/copy/s3/s3_presigned_upload.test_slow
 
 # 2
 docker compose -f scripts/presigned_url.yml -p duckdb-mc up -d 
-sleep 3
+sleep 60
 
 # 3 
 # duckdb-mc_minio_mc-[1-9]* or duckdb-mc_minio_mc_[1-9]*
