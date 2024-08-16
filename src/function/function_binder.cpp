@@ -54,19 +54,26 @@ optional_idx FunctionBinder::BindFunctionCost(const SimpleFunction &func, const 
 	}
 	idx_t cost = 0;
 	bool has_parameter = false;
+	bool has_type_match = false;
 	for (idx_t i = 0; i < arguments.size(); i++) {
 		if (arguments[i].id() == LogicalTypeId::UNKNOWN) {
 			has_parameter = true;
 			continue;
 		}
 		int64_t cast_cost = CastFunctionSet::Get(context).ImplicitCastCost(arguments[i], func.arguments[i]);
-		if (cast_cost >= 0) {
+		if (cast_cost == 0) {
+			// has at least one argument which type match the candidate function
+			has_type_match = true;
+		} else if (cast_cost > 0) {
 			// we can implicitly cast, add the cost to the total cost
 			cost += idx_t(cast_cost);
 		} else {
 			// we can't implicitly cast: throw an error
 			return optional_idx();
 		}
+	}
+	if (!has_type_match) {
+		return optional_idx();
 	}
 	if (has_parameter) {
 		// all arguments are implicitly castable and there is a parameter - return 0 as cost

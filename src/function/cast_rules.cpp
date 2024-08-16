@@ -337,6 +337,9 @@ int64_t CastRules::ImplicitCast(const LogicalType &from, const LogicalType &to) 
 		// NULL expression can be cast to anything
 		return TargetTypeCost(to);
 	}
+	if (from.id() == LogicalTypeId::VARCHAR) {
+		return TargetTypeCost(to);
+	}
 	if (from.id() == LogicalTypeId::UNKNOWN) {
 		// parameter expression can be cast to anything for no cost
 		return 0;
