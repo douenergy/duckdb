@@ -72,7 +72,7 @@ optional_idx FunctionBinder::BindFunctionCost(const SimpleFunction &func, const 
 			return optional_idx();
 		}
 	}
-	if (!has_type_match) {
+	if (!has_type_match && has_parameter) {
 		return optional_idx();
 	}
 	if (has_parameter) {
